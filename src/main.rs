@@ -2,15 +2,21 @@ use std::{
     env,
     fs::{File, read_to_string, remove_file},
     io::{self, Write},
-    process::Command,
+    process::{Command, exit},
 };
 use winreg::{HKCU, RegKey, enums::*};
 
 type IoResult<T> = Result<T, io::Error>;
 
-// setx <name> [value]
-// setx -[(a|append)|(p|prepend)|(m|move)|(d|delete)] <paths...>
-// setx -[e|edit-path] <editor>
+fn show_help(code: i32) {
+    let msg = "Usage:
+    setx <var-name> [value]    if value is none, will remove this var.
+    setx -[(a|append)|(p|prepend)|(d|delete)] <paths...>
+    setx -[e|edit-path] <editor>    use editor edit PATH";
+    eprintln!("{}", msg);
+    exit(code)
+}
+
 macro_rules! env_set_value {
     () => {
         HKCU.open_subkey_with_flags(ENVIRONMENT, KEY_SET_VALUE)
@@ -19,20 +25,25 @@ macro_rules! env_set_value {
 fn main() -> IoResult<()> {
     let mut args = env::args().skip(1).peekable();
     match (&args.next(), args.peek()) {
+        (Some(flag), ..)
+            if flag.starts_with("-") && matches!(flag.trim_start_matches("-"), "h" | "help") =>
+        {
+            show_help(0)
+        }
         (Some(flag), Some(_)) if flag.starts_with("-") => {
             let cu_env = HKCU.open_subkey_with_flags(ENVIRONMENT, KEY_ALL_ACCESS)?;
             let args: Vec<_> = args.collect();
             let flag = flag.trim_start_matches("-");
             set_path(args, flag, cu_env)?;
         }
-        (Some(name), value) => {
+        (Some(name), value) if !name.starts_with("-") => {
             if let Some(value) = value {
                 set_var(name, value)?
             } else {
                 remove_var(name)?
             }
         }
-        _ => todo!(),
+        _ => show_help(1),
     }
     Ok(())
 }
@@ -47,7 +58,6 @@ fn set_path(args: Vec<String>, flag: &str, cu_env: RegKey) -> IoResult<()> {
         ($val:tt) => {
             cu_env.set_value(PATH, &$val)?;
             unsafe { env::set_var(PATH, &$val) };
-            
         };
     }
     Ok(match flag {
@@ -99,7 +109,9 @@ fn set_path(args: Vec<String>, flag: &str, cu_env: RegKey) -> IoResult<()> {
 
             remove_file(tmp_file_path)?;
         }
-        _ => {}
+        _ => {
+            show_help(1);
+        }
     })
 }
 
