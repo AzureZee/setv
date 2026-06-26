@@ -54,7 +54,6 @@ fn set_path(args: Vec<String>, flag: &str, cu_env: Key) -> IoResult<()> {
     macro_rules! set_path_val {
         ($val:tt) => {
             cu_env.set_expand_string(PATH, &$val)?;
-            unsafe { env::set_var(PATH, &$val) };
         };
     }
     Ok(match flag {
@@ -113,13 +112,11 @@ fn set_path(args: Vec<String>, flag: &str, cu_env: Key) -> IoResult<()> {
 fn set_var(name: &str, value: &str) -> IoResult<()> {
     let key = CURRENT_USER.options().write().open(ENVIRONMENT)?;
     key.set_string(name, value)?;
-    unsafe { env::set_var(name, value) };
     Ok(())
 }
 fn remove_var(name: &str) -> IoResult<()> {
     let key = CURRENT_USER.options().write().open(ENVIRONMENT)?;
     key.remove_value(name)?;
-    unsafe { env::remove_var(name) };
     Ok(())
 }
 const ENVIRONMENT: &str = "Environment";
