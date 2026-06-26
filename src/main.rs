@@ -28,7 +28,7 @@ fn main() -> IoResult<()> {
             let key = env_key()?;
             let args: Vec<_> = args.collect();
             let flag = flag.trim_start_matches("-");
-            set_path(args, flag, key)?;
+            set_path_var(key, flag, args)?;
         }
         (Some(name), value) if !name.starts_with("-") => {
             set_env_var(env_key()?, name, value.map(|x| x.as_str()))?;
@@ -38,7 +38,7 @@ fn main() -> IoResult<()> {
     Ok(())
 }
 
-fn set_path(args: Vec<String>, flag: &str, key: Key) -> IoResult<()> {
+fn set_path_var(key: Key, flag: &str, args: Vec<String>) -> IoResult<()> {
     let mut path_var: String = key.get_string(PATH)?;
 
     const SEMICOLON: &str = ";";
