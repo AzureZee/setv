@@ -1,17 +1,3 @@
-[alias]
-xcheck  = "xwin check"
-xbuild  = "xwin build"
-xclippy = "xwin clippy"
-xtest   = "xwin test"
-xrun    = "xwin run"
-b       = "xbuild"
-c       = "xcheck"
-t       = "xtest"
-r       = "xrun"
-
-[build]
-target = "x86_64-pc-windows-msvc"
-
 [profile.release]
 panic = "immediate-abort"
 
