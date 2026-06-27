@@ -167,8 +167,8 @@ const USER_ENV: Env = Env {
     path: USER_ENV_PATH,
 };
 
-// 设置环境变量.
-// 如果 `value` 为 `None`, 就移除参数 `name` 所代表的环境变量
+/// 设置环境变量.
+/// 如果 `value` 为 `None`, 就移除参数 `name` 所代表的环境变量
 fn set_env_var(key: Key, name: &str, value: Option<&str>) -> IoResult<()> {
     match value {
         Some(value) => {
@@ -186,7 +186,7 @@ fn set_env_var(key: Key, name: &str, value: Option<&str>) -> IoResult<()> {
     Ok(())
 }
 
-// 检查当前进程是否已提权
+/// 检查当前进程是否已提权
 fn is_elevated() -> windows::core::Result<bool> {
     // https://github.com/microsoft/windows-rs/issues/1363#issuecomment-1018671172
     const CURRENT_PROCESS_TOKEN: HANDLE = HANDLE(-4isize as *mut _);
@@ -209,7 +209,7 @@ fn is_elevated() -> windows::core::Result<bool> {
     }
 }
 
-// 通知所有顶级窗口环境变量已变更
+/// 通知所有顶级窗口环境变量已变更
 fn notify_environment_changed() {
     // https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-settingchange
     // To effect a change in the environment variables for the system or the user,
